@@ -1,7 +1,7 @@
 module Geminabox
 
   class IncomingGem
-    def initialize(gem_data, root_path = Geminabox.data)
+    def initialize(gem_data)
       unless gem_data.respond_to? :read
         raise ArgumentError, "Expected an instance of IO"
       end
@@ -20,8 +20,6 @@ module Geminabox
 
       @tempfile.close
       @sha1 = digest.hexdigest
-
-      @root_path = root_path
     end
 
     def gem_data
@@ -56,10 +54,6 @@ module Geminabox
       filename = %W[#{spec.name} #{spec.version}]
       filename.push(spec.platform) if spec.platform && spec.platform != "ruby"
       filename.join("-") + ".gem"
-    end
-
-    def dest_filename
-      File.join(@root_path, "gems", name)
     end
 
     def hexdigest

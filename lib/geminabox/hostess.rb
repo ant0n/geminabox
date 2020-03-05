@@ -1,3 +1,4 @@
+
 require 'sinatra/base'
 
 module Geminabox
@@ -39,6 +40,7 @@ module Geminabox
     end
 
     get "/gems/*.gem" do
+      Geminabox.store.update_local_file request.path_info
       serve
     end
 

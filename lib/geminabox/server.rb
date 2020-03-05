@@ -1,3 +1,4 @@
+
 require 'reentrant_flock'
 require 'rubygems/util'
 
@@ -142,7 +143,7 @@ module Geminabox
       end
 
       serialize_update do
-        File.delete file_path if File.exist? file_path
+        store.delete request.path_info
         self.class.reindex(:force_rebuild)
         redirect url("/")
       end
@@ -215,7 +216,7 @@ module Geminabox
 
     def handle_incoming_gem(gem)
       begin
-        GemStore.create(gem, params[:overwrite])
+        settings.store.create(gem, params[:overwrite])
       rescue GemStoreError => error
         error_response error.code, error.reason
       end
@@ -249,10 +250,6 @@ module Geminabox
 </html>
 HTML
       halt [code, html]
-    end
-
-    def file_path
-      File.expand_path(File.join(Geminabox.data, *request.path_info))
     end
 
     def dependency_cache

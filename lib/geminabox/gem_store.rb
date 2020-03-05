@@ -8,6 +8,18 @@ module Geminabox
       gem_store.save
     end
 
+    def self.delete(path_info)
+      File.delete local_path path_info
+    end
+
+    def self.update_local_file(path_info)
+      # No action for local file store
+    end
+
+    def self.local_path(path_info)
+      File.expand_path File.join Geminabox.data, *path_info
+    end
+
     def initialize(gem, overwrite = false)
       @gem = gem
       @overwrite = overwrite && overwrite == 'true'
@@ -33,7 +45,7 @@ module Geminabox
     end
 
     def check_replacement_status
-      if !overwrite and Geminabox::Server.disallow_replace? and File.exist?(gem.dest_filename)
+      if !overwrite and Geminabox::Server.disallow_replace? and File.exist? dest_filename
         if existing_file_digest != gem.hexdigest
           raise GemStoreError.new(409, "Updating an existing gem is not permitted.\nYou should either delete the existing version, or change your version number.")
         else
@@ -47,6 +59,11 @@ module Geminabox
     end
 
     private
+
+    def dest_filename
+      File.join(Geminabox.data, "gems", gem.name)
+    end
+
     def ensure_existing_data_folder_compatible
       if File.exist? Geminabox.data
         ensure_data_folder_is_directory
@@ -69,12 +86,12 @@ module Geminabox
     end
 
     def existing_file_digest
-      Digest::SHA1.file(gem.dest_filename).hexdigest
+      Digest::SHA1.file(dest_filename).hexdigest
     end
 
     def write_and_index
       tmpfile = gem.gem_data
-      atomic_write(gem.dest_filename) do |f|
+      atomic_write(dest_filename) do |f|
         while blk = tmpfile.read(65536)
           f << blk
         end

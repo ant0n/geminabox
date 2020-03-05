@@ -1,3 +1,4 @@
+
 require 'sinatra/base'
 require 'net/http'
 
@@ -48,6 +49,7 @@ module Geminabox
       end
 
       get "/gems/*.gem" do
+        Geminabox.store.update_local_file request.path_info
         get_from_rubygems_if_not_local
         serve
       end
@@ -61,7 +63,7 @@ module Geminabox
           ruby_gems_url = Geminabox.ruby_gems_url
           path = File.join(ruby_gems_url, *request.path_info)
           content = Geminabox.http_adapter.get_content(path)
-          GemStore.create(IncomingGem.new(StringIO.new(content)))
+          GemStore.store.create(IncomingGem.new(StringIO.new(content)))
         end
 
       end
